@@ -1,0 +1,50 @@
+---
+title: "Game recommendations"
+description: Discover free-to-play PC games sourced from the FreeToGame API.
+---
+
+The recommendations page (`recomendaciones.html`) surfaces a curated list of free-to-play PC games fetched from the FreeToGame API. Games are displayed as visual cards so you can quickly browse titles, genres, and thumbnails without leaving the app.
+
+## What the recommendations section shows
+
+Each game card in the `.games-grid` container includes:
+
+- A **thumbnail image** displayed at a 16:9 aspect ratio
+- The **game title**
+- The **genre**
+- Additional metadata returned by the FreeToGame API (such as platform and publisher)
+
+The list is sorted by **release date** (newest first) as specified in the API request.
+
+## How to refresh recommendations
+
+Click the **Buscar Otras Recomendaciones** button to reload the games grid. The button triggers a new request to the backend proxy, which fetches a fresh response from the FreeToGame API and re-renders the cards.
+
+<Tip>
+  The FreeToGame catalog is updated regularly with newly released titles. Refreshing the list is a quick way to discover games that were added since your last visit.
+</Tip>
+
+## Where the data comes from
+
+The app uses a PHP backend proxy (`php/third_party_service.php`) to fetch game data. The proxy issues the following request on the server side:
+
+```
+GET https://www.freetogame.com/api/games?platform=pc&sort-by=release-date
+User-Agent: ProyectoGestionJuegos/1.0
+```
+
+The proxy returns a JSON array of game objects, which the frontend (`js/recomendaciones.js`) uses to render the cards.
+
+<Note>
+  Game data is provided by the [FreeToGame API](https://www.freetogame.com/api-doc) and is not affiliated with or maintained by Mi Colección de Juegos. The availability, accuracy, and completeness of the data depend entirely on the FreeToGame service.
+</Note>
+
+### Why a PHP proxy?
+
+Directly calling the FreeToGame API from the browser would fail due to [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) restrictions. The PHP proxy fetches the data server-side and forwards the JSON response to the frontend, avoiding cross-origin issues entirely.
+
+## Limitations
+
+- **Free-to-play PC games only.** The API request is scoped to `platform=pc`. Console titles and paid games are not included.
+- **Sorted by release date.** Results always reflect the newest titles first; there is no option to sort by rating or popularity from this page.
+- **Third-party data.** If the FreeToGame API is unavailable or returns an error, the recommendations grid will not populate.

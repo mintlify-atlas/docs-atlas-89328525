@@ -1,80 +1,111 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: 'Quickstart'
+description: 'Get Mi Colección de Juegos running locally in a few minutes.'
 ---
 
-## Get started in three steps
+Mi Colección de Juegos is a PHP/SQLite web app with no build step. You only need a PHP web server and a browser.
 
-Get your documentation site running locally and make your first customization.
+<Steps>
+  <Step title="Check prerequisites">
+    Confirm PHP 7.4+ is installed and the SQLite3 and PDO extensions are enabled.
 
-### Step 1: Set up your local environment
+    ```bash
+    php -v
+    php -m | grep -E 'sqlite|pdo'
+    ```
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    You should see `sqlite3`, `pdo_sqlite`, and `PDO` in the output. See [Requirements](/setup/requirements) for details.
+  </Step>
 
-### Step 2: Deploy your changes
+  <Step title="Get the source code">
+    Clone the repository or download and extract the archive.
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    ```bash
+    git clone https://github.com/your-org/mi-coleccion-de-juegos.git
+    cd mi-coleccion-de-juegos
+    ```
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+    There is no `composer install`, `npm install`, or build command to run.
+  </Step>
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+  <Step title="Place files in your web server root">
+    Copy or move the project folder into your web server's document root.
 
-### Step 3: Go live
+    <Tabs>
+      <Tab title="XAMPP (Windows)">
+        Copy the project folder into `C:\xampp\htdocs\`.
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+        ```
+        C:\xampp\htdocs\mi-coleccion-de-juegos\
+        ```
 
-## Next steps
+        <Note>
+          XAMPP is the easiest option on Windows. Download it from [apachefriends.org](https://www.apachefriends.org) if you don't have it. Start both the **Apache** and nothing else — SQLite is file-based and requires no separate database server.
+        </Note>
+      </Tab>
+      <Tab title="PHP built-in server">
+        You can serve the project directly from its directory using PHP's built-in server — no Apache or XAMPP required.
 
-Now that you have your docs running, explore these key features:
+        ```bash
+        php -S localhost:8000
+        ```
+
+        Then open [http://localhost:8000](http://localhost:8000) in your browser.
+
+        <Warning>
+          The PHP built-in server is suitable for local development only. Do not use it in production.
+        </Warning>
+      </Tab>
+      <Tab title="Apache / WAMP">
+        Copy the project folder into your Apache document root (commonly `/var/www/html/` on Linux or `C:\wamp64\www\` on Windows with WAMP).
+
+        ```
+        /var/www/html/mi-coleccion-de-juegos/
+        ```
+
+        Make sure `mod_php` is enabled and the `php/` directory is writable by the web server user.
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Open the app in your browser">
+    Navigate to the app in your browser. The exact URL depends on your setup:
+
+    | Server | URL |
+    |--------|-----|
+    | XAMPP / WAMP | `http://localhost/mi-coleccion-de-juegos/` |
+    | PHP built-in server | `http://localhost:8000/` |
+    | Apache (Linux) | `http://localhost/mi-coleccion-de-juegos/` |
+
+    The app opens `index.html` by default.
+  </Step>
+
+  <Step title="Verify the database initializes">
+    On the first request to any PHP endpoint, `getDB()` in `php/setup_db.php` automatically creates the SQLite database file at `php/games.db` and sets up the `juegos` table.
+
+    No manual SQL or migration commands are needed. If you see the main page without errors, the database is ready.
+
+    <Tip>
+      If you get a "permission denied" or "unable to open database" error, make the `php/` directory writable by your web server process. See [Database setup](/setup/database) for details.
+    </Tip>
+  </Step>
+</Steps>
+
+## What's next
+
+Once the app is running, explore the main features:
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Add a game" icon="plus" href="/features/add-game">
+    Add games to your collection via the Add Game form.
+  </Card>
+  <Card title="Browse stores" icon="store" href="/features/store-locator">
+    Find nearby video game stores with the map locator.
+  </Card>
+  <Card title="Get recommendations" icon="star" href="/features/recommendations">
+    Discover free-to-play PC game recommendations.
+  </Card>
+  <Card title="Database setup" icon="database" href="/setup/database">
+    Learn how the SQLite database is structured and initialized.
+  </Card>
 </CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>

@@ -1,0 +1,72 @@
+---
+title: "Introduction"
+description: "Mi Colección de Juegos — a web app to manage your personal video game collection."
+---
+
+# Mi Colección de Juegos
+
+**Mi Colección de Juegos** is a full-stack web application that lets you catalog, search, and manage your personal video game library. Built with HTML, CSS, JavaScript, and a PHP/SQLite backend, it runs entirely in a standard web hosting environment with no external dependencies beyond a PHP server.
+
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Get the app running in minutes on a local or hosted PHP server
+  </Card>
+  <Card title="Add a Game" icon="plus" href="/features/add-game">
+    Register a new title with genre, platform, and release year
+  </Card>
+  <Card title="Browse Your Collection" icon="book" href="/features/my-games">
+    View, search, edit, and delete games in your library
+  </Card>
+  <Card title="API Reference" icon="code" href="/api/db-service">
+    Explore the PHP backend services that power the app
+  </Card>
+</CardGroup>
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="Personal game library" icon="gamepad">
+    Store games with title, genre, platform(s), and release year in a local SQLite database
+  </Card>
+  <Card title="Search & filter" icon="magnifying-glass">
+    Instantly search your collection by title or genre with debounced live filtering
+  </Card>
+  <Card title="Full CRUD" icon="pen-to-square">
+    Add, edit, and delete game entries through a clean modal-based UI
+  </Card>
+  <Card title="Store locator" icon="map-pin">
+    Find nearby video game stores using an embedded Google Maps view with geolocation
+  </Card>
+  <Card title="Game recommendations" icon="star">
+    Discover free-to-play PC titles sourced live from the FreeToGame public API
+  </Card>
+  <Card title="JSON API backend" icon="server">
+    RESTful PHP services return structured JSON responses with Problem Details error handling
+  </Card>
+</CardGroup>
+
+## How it works
+
+The application is a single-page-style multi-HTML app served by a PHP web server. The frontend communicates with backend PHP services over `fetch`, sending and receiving JSON. All game data is stored in a local SQLite database file (`php/games.db`).
+
+```
+Browser (HTML + JS)
+       │
+       ├──► php/db_service.php       — list / search games
+       ├──► php/form_service.php     — add a new game
+       ├──► php/edit_service.php     — update a game
+       ├──► php/delete_service.php   — remove a game
+       ├──► php/json_service.php     — JSON utility service
+       └──► php/third_party_service.php — FreeToGame recommendations
+```
+
+## Tech stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | HTML5, CSS3, Vanilla JavaScript (ES Modules) |
+| Backend | PHP 7.4+ |
+| Database | SQLite 3 (via PHP PDO) |
+| Maps | Google Maps Embed API |
+| Recommendations | FreeToGame REST API |
+| Icons | Flaticon UIcons, Google Fonts (Inter) |

@@ -1,0 +1,61 @@
+---
+title: "form_service.php"
+description: "Add a new game to the collection."
+---
+
+Accepts a standard HTML form POST and inserts a new game record into the collection database.
+
+<Warning>
+  This endpoint only accepts `POST` requests. Any other HTTP method returns a `405 Method Not Allowed` response.
+</Warning>
+
+## POST — add a game
+
+**Content-Type:** `application/x-www-form-urlencoded`
+
+### Request fields
+
+<ParamField body="title" type="string" required>
+  Title of the game. Cannot be empty.
+</ParamField>
+
+<ParamField body="genre" type="string" required>
+  Genre of the game (e.g., Action, RPG, Sports). Cannot be empty.
+</ParamField>
+
+<ParamField body="platforms[]" type="string[]" required>
+  One or more platforms. At least one value must be provided. Submit multiple values using repeated `platforms[]` keys.
+</ParamField>
+
+<ParamField body="release_year" type="integer" required placeholder="1950–2100">
+  Year the game was released. Must be an integer between 1950 and 2100.
+</ParamField>
+
+### Validation errors
+
+The server returns HTTP `400` with a JSON error message for the following conditions:
+
+| Condition | Error message |
+| --- | --- |
+| `title` or `genre` is empty | `"Faltan datos requeridos: Título y Género no pueden estar vacíos."` |
+| No platform provided | `"Falta ingresar al menos una plataforma."` |
+| `release_year` out of range or non-numeric | `"Año de lanzamiento inválido."` |
+
+### Success response
+
+```json 200
+{ "success": true, "message": "Juego añadido exitosamente a la base de datos." }
+```
+
+### Example
+
+```bash cURL
+curl --request POST \
+  --url http://localhost/php/form_service.php \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'title=Elden Ring' \
+  --data-urlencode 'genre=RPG' \
+  --data-urlencode 'platforms[]=PlayStation 5' \
+  --data-urlencode 'platforms[]=PC' \
+  --data-urlencode 'release_year=2022'
+```

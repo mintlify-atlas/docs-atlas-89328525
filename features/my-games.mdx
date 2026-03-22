@@ -1,0 +1,84 @@
+---
+title: "My Games"
+description: View and search your personal video game collection.
+---
+
+The **My Games** page is the main view of your collection. It loads all your registered games and displays them in a card grid, with a live search bar to filter by title or genre.
+
+## Browsing your collection
+
+When the page loads, `js/index.js` sends a `GET` request to `php/db_service.php`, which returns all games stored in the SQLite database. Each game is rendered as a card in a responsive CSS grid.
+
+### Game card fields
+
+<CardGroup cols={2}>
+  <Card title="Title" icon="gamepad-2">
+    The full name of the game, displayed as the card heading.
+  </Card>
+  <Card title="Genre" icon="tag">
+    Shown as a styled tag below the title (e.g., RPG, Acción, Shooter).
+  </Card>
+  <Card title="Release Year" icon="calendar">
+    The year the game was released, shown beneath the genre tag.
+  </Card>
+  <Card title="Platforms" icon="monitor">
+    A list of platforms the game is available on (e.g., PC, PlayStation 5, Nintendo Switch 2).
+  </Card>
+</CardGroup>
+
+Each card also includes two action buttons:
+
+- **Editar** — opens the inline edit modal pre-filled with the game's current data.
+- **Eliminar** — triggers a confirmation dialog before deleting the game.
+
+## Searching and filtering
+
+The search bar at the top of the page lets you filter games in real time.
+
+<Note>
+  The search input uses a **300 ms debounce**. The query is not sent until you stop typing for 300 milliseconds, which prevents unnecessary requests while you are still entering text.
+</Note>
+
+When the debounce fires, `js/index.js` sends a `POST` request to `php/db_service.php` with the following body:
+
+```json
+{ "query": "your search term" }
+```
+
+The server filters results using a SQL `LIKE` clause that matches against both the **title** and the **genre** fields:
+
+```sql
+WHERE title LIKE '%query%' OR genre LIKE '%query%'
+```
+
+The card grid re-renders automatically with the filtered results. Clearing the search field restores the full collection.
+
+## Editing a game
+
+<Steps>
+  <Step title="Click Editar">
+    Find the game card you want to update and click the **Editar** button. The `#edit-modal` opens as an overlay.
+  </Step>
+  <Step title="Review pre-filled data">
+    The modal is populated with the game's current title, genre, platforms, and release year so you can see the existing values before making changes.
+  </Step>
+  <Step title="Make your changes">
+    Update any fields you want to change. Fields you leave unchanged will not be overwritten.
+  </Step>
+  <Step title="Save changes">
+    Click **Guardar Cambios**. The form data is `POST`ed to `php/edit_service.php`.
+  </Step>
+  <Step title="Confirm the result">
+    On success, the modal closes and the game list refreshes with the updated data. If an error occurs, a message is shown inside `#edit-error` within the modal.
+  </Step>
+</Steps>
+
+## Deleting a game
+
+Clicking **Eliminar** on a game card calls `window.deleteGame(id)`, which displays a browser confirmation dialog before taking any action.
+
+If you confirm, the function `POST`s `{ id }` to `php/delete_service.php`. On success, the card is removed and the list refreshes automatically.
+
+<Warning>
+  Deletion is permanent. There is no undo — once you confirm the dialog, the game is removed from the database immediately.
+</Warning>

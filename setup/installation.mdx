@@ -1,0 +1,109 @@
+---
+title: 'Installation'
+description: 'How to install and run Mi Colección de Juegos on your local machine.'
+---
+
+The app requires no package manager, build tool, or compilation step. Installation is just getting the files into the right place.
+
+## Before you start
+
+Make sure your system meets the [requirements](/setup/requirements) — specifically PHP 7.4+, the `pdo_sqlite` extension, and a web server.
+
+## Install
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/your-org/mi-coleccion-de-juegos.git
+    ```
+
+    Alternatively, download and extract the ZIP from the repository's releases page.
+  </Step>
+
+  <Step title="Place the files in your web server root">
+    Move or copy the project folder into the document root for your web server.
+
+    <Tabs>
+      <Tab title="XAMPP">
+        Copy the project into the `htdocs` directory:
+
+        **Windows:**
+        ```
+        C:\xampp\htdocs\mi-coleccion-de-juegos\
+        ```
+
+        **macOS:**
+        ```
+        /Applications/XAMPP/htdocs/mi-coleccion-de-juegos/
+        ```
+
+        Then start Apache from the XAMPP Control Panel and open:
+
+        ```
+        http://localhost/mi-coleccion-de-juegos/
+        ```
+      </Tab>
+      <Tab title="PHP built-in server">
+        No web server installation required. From the project root, run:
+
+        ```bash
+        php -S localhost:8000
+        ```
+
+        Then open [http://localhost:8000](http://localhost:8000) in your browser.
+
+        <Warning>
+          The PHP built-in server is single-threaded and not suitable for production use.
+        </Warning>
+      </Tab>
+      <Tab title="Apache">
+        Copy the project to your Apache document root:
+
+        **Linux:**
+        ```bash
+        sudo cp -r mi-coleccion-de-juegos /var/www/html/
+        ```
+
+        **Make the `php/` directory writable** by the Apache user so the database file can be created:
+
+        ```bash
+        sudo chown -R www-data:www-data /var/www/html/mi-coleccion-de-juegos/php/
+        ```
+
+        Then open:
+
+        ```
+        http://localhost/mi-coleccion-de-juegos/
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Open the app">
+    Navigate to the app URL in your browser. The main page (`index.html`) loads your game collection.
+
+    On the first request to any PHP endpoint, the database is created automatically. No manual setup is required.
+  </Step>
+</Steps>
+
+## Project structure
+
+```
+mi-coleccion-de-juegos/
+├── index.html              # Collection overview
+├── agregar.html            # Add a game
+├── tiendas.html            # Store management
+├── recomendaciones.html    # Game recommendations
+└── php/
+    ├── setup_db.php        # Database initialization and connection
+    └── games.db            # SQLite database (auto-created on first use)
+```
+
+<Note>
+  There is no `vendor/`, `node_modules/`, or compiled output directory. Everything in the repository is ready to serve as-is.
+</Note>
+
+## Next steps
+
+- [Database setup](/setup/database) — understand how the SQLite database is initialized and structured
+- [Requirements](/setup/requirements) — verify your PHP extensions if you run into issues

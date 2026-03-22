@@ -1,0 +1,68 @@
+---
+title: "Edit and delete games"
+description: Update or remove games from your collection.
+---
+
+You can modify or remove any game directly from the main collection view. Both actions are triggered from the game card buttons and are handled by `js/index.js`.
+
+## Editing a game
+
+<Tip>
+  Only fill in the fields you want to change. The edit form treats empty fields as "no change" — any field you leave blank will keep its current value in the database.
+</Tip>
+
+<Steps>
+  <Step title="Click Editar">
+    Locate the game card in your collection and click the **Editar** button. The `#edit-modal` opens as an inline overlay.
+  </Step>
+  <Step title="Review the pre-filled data">
+    The modal is automatically populated with the game's current title, genre, selected platforms, and release year. Review these values before editing.
+  </Step>
+  <Step title="Edit the fields you want to change">
+    Update any combination of fields: title, genre, platforms, or release year. Leave any field blank to keep its existing value.
+  </Step>
+  <Step title="Click Guardar Cambios">
+    Submit the modal form. The updated data is `POST`ed to `php/edit_service.php`.
+
+    ```http
+    POST php/edit_service.php
+    Content-Type: application/x-www-form-urlencoded
+
+    id=42&title=Elden+Ring&genre=RPG&platforms[]=PC&release_year=2022
+    ```
+  </Step>
+  <Step title="Confirm the result">
+    On success, the modal closes automatically and the game list refreshes to show the updated values. If an error occurs during processing, a message is displayed inside `#edit-error` within the modal.
+  </Step>
+</Steps>
+
+## Deleting a game
+
+<Warning>
+  Deletion is **permanent**. There is no undo or recycle bin — once you confirm the dialog, the game record is immediately removed from the database and cannot be recovered.
+</Warning>
+
+<Steps>
+  <Step title="Click Eliminar">
+    Locate the game card you want to remove and click the **Eliminar** button.
+  </Step>
+  <Step title="Confirm the dialog">
+    A browser confirmation dialog appears with the message:
+
+    > ¿Estás seguro de que deseas eliminar este juego?
+
+    Click **OK** to proceed or **Cancel** to abort.
+  </Step>
+  <Step title="Game is removed">
+    If you confirm, `{ id }` is `POST`ed to `php/delete_service.php`.
+
+    ```http
+    POST php/delete_service.php
+    Content-Type: application/x-www-form-urlencoded
+
+    id=42
+    ```
+
+    On success, the game card is removed from the grid and the list refreshes automatically.
+  </Step>
+</Steps>

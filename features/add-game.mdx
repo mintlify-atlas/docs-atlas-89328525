@@ -1,0 +1,78 @@
+---
+title: "Add a game"
+description: Register a new video game in your collection.
+---
+
+The **Add a Game** page (`agregar.html` + `js/agregar.js`) provides a form for registering a new game in your collection. Submitted data is validated server-side by `php/form_service.php` before being saved to the database.
+
+## Form fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| Title | Text input | Yes | Full name of the game (e.g., "Elden Ring") |
+| Genre | Dropdown | Yes | Select one from the list below |
+| Platforms | Checkboxes | Yes | Select one or more |
+| Release Year | Number input | Yes | Must be between 1950 and 2100 |
+
+### Genre options
+
+Acción, Aventura, RPG, Deportes, Estrategia, Shooter, Plataformas, Puzzle, Conducción, Terror, Otros
+
+### Platform options
+
+PlayStation 4, PlayStation 5, Xbox One, Xbox Series X/S, PC, Nintendo Switch 2
+
+## Adding a game
+
+<Steps>
+  <Step title="Open the Add Game page">
+    Navigate to `agregar.html` from the main menu. The empty form is displayed.
+  </Step>
+  <Step title="Enter the title">
+    Type the full name of the game in the **Title** field. This field is required.
+
+    ```
+    Title: Spiderman
+    ```
+  </Step>
+  <Step title="Select a genre">
+    Choose the most appropriate genre from the **Genre** dropdown.
+
+    ```
+    Genre: Acción
+    ```
+  </Step>
+  <Step title="Select platforms">
+    Check every platform the game is available on. At least one platform must be selected.
+
+    ```
+    Platforms: PlayStation 4, PlayStation 5, PC
+    ```
+  </Step>
+  <Step title="Enter the release year">
+    Type the four-digit release year in the **Release Year** field.
+
+    ```
+    Release Year: 2018
+    ```
+  </Step>
+  <Step title="Submit the form">
+    Click **Agregar Juego**. The form data is sent to `php/form_service.php` for validation and storage.
+  </Step>
+  <Step title="Confirm success">
+    If the game is saved successfully, a confirmation message appears in `#form-success` and the form resets. If validation fails, errors are shown in `#form-error`.
+  </Step>
+</Steps>
+
+## Validation rules
+
+<Warning>
+  The following rules are enforced server-side by `php/form_service.php`. The form will not save if any rule is violated.
+
+  - **Title** is required and must not be empty.
+  - **Genre** is required and must not be empty.
+  - **At least one platform** must be selected.
+  - **Release Year** must be a number between **1950** and **2100** (inclusive).
+
+  Errors are displayed inline in `#form-error` at the top of the form.
+</Warning>

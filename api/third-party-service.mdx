@@ -1,0 +1,76 @@
+---
+title: "third_party_service.php"
+description: "Proxies the FreeToGame API to fetch free-to-play PC game recommendations."
+---
+
+This endpoint is a server-side proxy that fetches free-to-play PC game data from the FreeToGame public API and returns it directly to the client.
+
+<Note>
+  This is a PHP proxy to avoid browser CORS restrictions. The client calls this local endpoint instead of the FreeToGame API directly, and the server forwards the request using `User-Agent: ProyectoGestionJuegos/1.0`.
+</Note>
+
+<Warning>
+  Response availability depends entirely on the external FreeToGame API (`freetogame.com`). If that service is unreachable or returns an error, this endpoint returns `502 Bad Gateway`.
+</Warning>
+
+## GET — fetch free-to-play games
+
+No request body or query parameters required. The upstream URL is fixed:
+
+```
+https://www.freetogame.com/api/games?platform=pc&sort-by=release-date
+```
+
+### Response fields
+
+The response is the raw JSON array returned by FreeToGame, passed through without modification.
+
+<ResponseField name="id" type="integer" required>
+  Unique identifier for the game in the FreeToGame catalog.
+</ResponseField>
+
+<ResponseField name="title" type="string" required>
+  Title of the free-to-play game.
+</ResponseField>
+
+<ResponseField name="thumbnail" type="string" required>
+  URL of the game's thumbnail image.
+</ResponseField>
+
+<ResponseField name="genre" type="string" required>
+  Genre of the game as classified by FreeToGame.
+</ResponseField>
+
+<ResponseField name="platform" type="string" required>
+  Platform(s) the game runs on (e.g., `"PC (Windows)"`).
+</ResponseField>
+
+<ResponseField name="game_url" type="string" required>
+  Direct URL to the game's page on FreeToGame.
+</ResponseField>
+
+### Error response
+
+```json 502
+{ "error": "Error al contactar el servicio de terceros." }
+```
+
+### Example
+
+```bash cURL
+curl --request GET \
+  --url http://localhost/php/third_party_service.php
+```
+
+```json Response (truncated)
+[
+  {
+    "id": 540,
+    "title": "Overwatch 2",
+    "thumbnail": "https://www.freetogame.com/g/540/thumbnail.jpg",
+    "genre": "Shooter",
+    "platform": "PC (Windows)",
+    "game_url": "https://www.freetogame.com/open/overwatch-2"
+  }
+]
+```

@@ -1,0 +1,164 @@
+---
+title: "Error handling"
+description: "How errors are reported and handled across all backend services."
+---
+
+All backend services in Mi Colección de Juegos return errors in the [RFC 7807 Problem Details](https://www.rfc-editor.org/rfc/rfc7807) format. This gives every error response a consistent, machine-readable structure that both the frontend and API consumers can rely on.
+
+<Note>
+  RFC 7807 defines a standard JSON format for HTTP error responses. Using `"type": "about:blank"` indicates that the HTTP status code itself (via its title) fully describes the problem, with the `detail` field providing the specific context.
+</Note>
+
+## Error response structure
+
+Every error response has `Content-Type: application/problem+json` and the following fields:
+
+<ResponseField name="type" type="string" required>
+  A URI reference identifying the problem type. All errors in this app use `"about:blank"`, meaning the HTTP status code title alone describes the problem category.
+</ResponseField>
+
+<ResponseField name="title" type="string" required>
+  A short, human-readable summary of the problem type. Corresponds to the standard HTTP status phrase (e.g., `"Bad Request"`, `"Method Not Allowed"`).
+</ResponseField>
+
+<ResponseField name="status" type="number" required>
+  The HTTP status code for this occurrence of the problem. Mirrors the actual HTTP response status code.
+</ResponseField>
+
+<ResponseField name="detail" type="string" required>
+  A human-readable explanation specific to this occurrence. This is the field the frontend displays directly to the user.
+</ResponseField>
+
+```json example error response
+{
+  "type": "about:blank",
+  "title": "Bad Request",
+  "status": 400,
+  "detail": "Faltan datos requeridos: Título y Género no pueden estar vacíos."
+}
+```
+
+## Error codes
+
+| Status | Title                 | When it occurs                                      |
+| ------ | --------------------- | --------------------------------------------------- |
+| `400`  | Bad Request           | A required field is missing or contains invalid data |
+| `405`  | Method Not Allowed    | The endpoint was called with the wrong HTTP method  |
+| `502`  | Bad Gateway           | An external service or dependency was unreachable   |
+
+## Example responses
+
+<AccordionGroup>
+  <Accordion title="400 Bad Request">
+    Returned when a required field is absent or fails validation. The `detail` field names the specific missing or invalid data.
+
+    ```json response
+    {
+      "type": "about:blank",
+      "title": "Bad Request",
+      "status": 400,
+      "detail": "Faltan datos requeridos: Título y Género no pueden estar vacíos."
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="405 Method Not Allowed">
+    Returned when the request uses an HTTP method that the endpoint does not support (e.g., sending a `GET` to a `POST`-only endpoint).
+
+    ```json response
+    {
+      "type": "about:blank",
+      "title": "Method Not Allowed",
+      "status": 405,
+      "detail": "Este endpoint solo acepta solicitudes POST."
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="502 Bad Gateway">
+    Returned when the backend cannot reach an external dependency (e.g., a remote API or service used during a request).
+
+    ```json response
+    {
+      "type": "about:blank",
+      "title": "Bad Gateway",
+      "status": 502,
+      "detail": "No se pudo conectar con el servicio externo. Inténtelo de nuevo más tarde."
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Error classes
+
+The error system is built on two PHP classes defined in `php/lib/`.
+
+### `ProblemDetailsError`
+
+The base class for all application errors. Accepts a message string and an HTTP status code, and produces a structured Problem Details payload.
+
+```php php/lib/ProblemDetailsException.php
+class ProblemDetailsError {
+    public function __construct(
+        protected string $detail,
+        protected int $status
+    ) {}
+
+    public function toArray(): array {
+        return [
+            'type'   => 'about:blank',
+            'title'  => $this->getTitle(),
+            'status' => $this->status,
+            'detail' => $this->detail,
+        ];
+    }
+}
+```
+
+### `ProblemDetailsException`
+
+Extends `ProblemDetailsError` and implements `\Throwable`, allowing it to be thrown and caught by the global exception handler. Used throughout the service layer to signal recoverable HTTP errors.
+
+```php php/lib/ProblemDetailsException.php
+class ProblemDetailsException extends ProblemDetailsError {
+    // Throwable — can be thrown and caught
+}
+```
+
+<Warning>
+  Only throw `ProblemDetailsException` for expected, handleable HTTP error conditions (e.g., missing input, wrong method). Unexpected internal errors should not be surfaced directly to the client with implementation details.
+</Warning>
+
+## Global exception handler
+
+`php/error_handling.php` registers a global exception handler that intercepts any uncaught `ProblemDetailsException` and renders it as a JSON response with the correct HTTP status code.
+
+```php php/error_handling.php
+set_exception_handler(function (Throwable $e) {
+    if ($e instanceof ProblemDetailsException) {
+        http_response_code($e->getStatus());
+        header('Content-Type: application/problem+json');
+        echo json_encode($e->toArray());
+    }
+});
+```
+
+## Frontend error handling
+
+The frontend reads Problem Details responses in `js/lib/muestraError.js` and `js/lib/ProblemDetailsError.js`. When a fetch call returns a non-2xx status, the frontend:
+
+1. Parses the JSON body as a Problem Details object.
+2. Reads the `detail` field.
+3. Displays that string directly to the user in the UI.
+
+```javascript js/lib/muestraError.js
+async function handleResponse(response) {
+  if (!response.ok) {
+    const problem = await response.json();
+    // problem.detail contains the user-facing message
+    muestraError(problem.detail);
+  }
+}
+```
+
+Because all services use the same response shape, a single error-handling utility covers every endpoint in the app.

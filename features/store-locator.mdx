@@ -1,0 +1,63 @@
+---
+title: "Store locator"
+description: Find video game stores near you with the embedded Google Maps view.
+---
+
+The store locator page (`tiendas.html`) embeds an interactive Google Maps view to help you find video game stores. By default, the map shows stores in Mexico City. You can also share your current location to re-center the map around where you are.
+
+## Using the store locator
+
+<Steps>
+  <Step title="Open the store locator">
+    Navigate to the **Tiendas** section of the app. The page loads immediately with an embedded Google Maps view centered on Mexico City (`tiendas de videojuegos en Ciudad de Mexico`) at zoom level 12.
+  </Step>
+  <Step title="Browse the default map">
+    The embedded map shows video game store locations across Mexico City. You can pan, zoom, and interact with the map directly inside the iframe.
+  </Step>
+  <Step title="Locate stores near you">
+    Click the **Localizarme en el mapa** button. Your browser will prompt you to allow location access. Once you grant permission, the map re-centers on your current coordinates so you can see nearby stores.
+  </Step>
+  <Step title="Check the status message">
+    After clicking the button, a status message appears below the map confirming that your location was found, or explaining why it could not be retrieved.
+  </Step>
+</Steps>
+
+## How geolocation works
+
+The **Localizarme en el mapa** button is handled by `js/tiendas.js`. When clicked, it calls the browser's [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API) via `navigator.geolocation.getCurrentPosition()`.
+
+On success, the script extracts the user's latitude and longitude and updates the `src` attribute of the embedded Google Maps `<iframe>` to center on those coordinates.
+
+On failure, the `#location-status` element displays an error message so you know what went wrong.
+
+```javascript
+// Simplified flow in js/tiendas.js
+navigator.geolocation.getCurrentPosition(
+  (position) => {
+    const { latitude, longitude } = position.coords;
+    mapIframe.src = `https://maps.google.com/maps?q=tiendas+de+videojuegos&ll=${latitude},${longitude}&z=12&output=embed`;
+    locationStatus.textContent = 'Ubicación encontrada.';
+  },
+  (error) => {
+    locationStatus.textContent = 'No se pudo obtener la ubicación.';
+  }
+);
+```
+
+## Default map view
+
+When the page first loads, the iframe defaults to a search for `tiendas de videojuegos en Ciudad de Mexico` at zoom level 12. No user interaction is required — the map is visible immediately without needing to share your location.
+
+## Browser permission requirements
+
+<Note>
+  The Geolocation API requires explicit permission from the user. When you click **Localizarme en el mapa**, your browser will display a permission prompt. You must click **Allow** for the map to update. If you have previously denied location access for this site, you will need to reset the permission in your browser's site settings.
+</Note>
+
+<Warning>
+  The Geolocation API only works on pages served over **HTTPS** in production environments. Running the app over plain HTTP will cause `navigator.geolocation` to be unavailable in most modern browsers, and the location button will not function. Make sure your deployment uses a valid TLS certificate.
+</Warning>
+
+## When geolocation is denied or unavailable
+
+If the user denies the permission prompt, or if the browser does not support the Geolocation API, the map remains on the default Mexico City view. The `#location-status` element displays an error message explaining the failure. No crash or blank state occurs — the page continues to show the default embedded map.

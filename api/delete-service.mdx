@@ -1,0 +1,43 @@
+---
+title: "delete_service.php"
+description: "Remove a game from the collection."
+---
+
+Permanently deletes a game record from the collection by its `id`.
+
+<Warning>
+  Deletion is permanent. There is no soft-delete or recycle bin — once a game is deleted it cannot be recovered.
+</Warning>
+
+## POST — delete a game
+
+**Content-Type:** `application/x-www-form-urlencoded`
+
+### Request fields
+
+<ParamField body="id" type="integer" required>
+  The ID of the game to delete. Must be a valid integer matching an existing record.
+</ParamField>
+
+### Validation errors
+
+The server returns HTTP `400` with a JSON error message for the following condition:
+
+| Condition | Error message |
+| --- | --- |
+| `id` is missing or not a valid integer | `"ID inválido para eliminar."` |
+
+### Success response
+
+```json 200
+{ "success": true, "message": "Juego eliminado exitosamente." }
+```
+
+### Example
+
+```bash cURL
+curl --request POST \
+  --url http://localhost/php/delete_service.php \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'id=3'
+```

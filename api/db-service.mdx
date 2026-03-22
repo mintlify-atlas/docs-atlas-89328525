@@ -1,0 +1,119 @@
+---
+title: "db_service.php"
+description: "List and search games in the collection."
+---
+
+This service handles two operations: fetching all games in the collection (GET) and searching games by title or genre (POST).
+
+## GET — list all games
+
+<ParamField path="path" type="string">
+  No request body or query parameters required.
+</ParamField>
+
+### Response fields
+
+<ResponseField name="id" type="integer" required>
+  Unique identifier for the game, auto-incremented.
+</ResponseField>
+
+<ResponseField name="title" type="string" required>
+  Title of the video game.
+</ResponseField>
+
+<ResponseField name="genre" type="string" required>
+  Genre of the game (e.g., RPG, Action, Sports).
+</ResponseField>
+
+<ResponseField name="platforms" type="string" required>
+  Comma-separated list of platforms the game is available on.
+</ResponseField>
+
+<ResponseField name="release_year" type="integer" required>
+  Year the game was released.
+</ResponseField>
+
+### Example
+
+```bash cURL
+curl --request GET \
+  --url http://localhost/php/db_service.php
+```
+
+```json Response
+[
+  {
+    "id": 3,
+    "title": "Elden Ring",
+    "genre": "RPG",
+    "platforms": "PlayStation 5, PC",
+    "release_year": 2022
+  },
+  {
+    "id": 2,
+    "title": "The Legend of Zelda: Tears of the Kingdom",
+    "genre": "Adventure",
+    "platforms": "Nintendo Switch",
+    "release_year": 2023
+  }
+]
+```
+
+---
+
+## POST — search games
+
+Search across the `title` and `genre` columns using a case-insensitive `LIKE %query%` match.
+
+<Note>
+  The request body must be valid JSON and the `Content-Type` header must be set to `application/json`.
+</Note>
+
+### Request body
+
+<ParamField body="query" type="string" required>
+  The search term to match against the `title` and `genre` columns. Partial matches are supported.
+</ParamField>
+
+### Response fields
+
+<ResponseField name="id" type="integer" required>
+  Unique identifier for the game.
+</ResponseField>
+
+<ResponseField name="title" type="string" required>
+  Title of the matched game.
+</ResponseField>
+
+<ResponseField name="genre" type="string" required>
+  Genre of the matched game.
+</ResponseField>
+
+<ResponseField name="platforms" type="string" required>
+  Comma-separated list of platforms.
+</ResponseField>
+
+<ResponseField name="release_year" type="integer" required>
+  Year the game was released.
+</ResponseField>
+
+### Example
+
+```bash cURL
+curl --request POST \
+  --url http://localhost/php/db_service.php \
+  --header 'Content-Type: application/json' \
+  --data '{"query": "RPG"}'
+```
+
+```json Response
+[
+  {
+    "id": 3,
+    "title": "Elden Ring",
+    "genre": "RPG",
+    "platforms": "PlayStation 5, PC",
+    "release_year": 2022
+  }
+]
+```

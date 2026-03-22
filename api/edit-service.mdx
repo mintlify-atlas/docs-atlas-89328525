@@ -1,0 +1,62 @@
+---
+title: "edit_service.php"
+description: "Update an existing game in the collection."
+---
+
+Updates one or more fields of an existing game record identified by its `id`. Only fields that are provided and non-empty are included in the `UPDATE` statement.
+
+<Note>
+  This endpoint performs a partial update. You do not need to send every field — only the fields you want to change. Fields that are omitted or empty are left unchanged in the database.
+</Note>
+
+## POST — edit a game
+
+**Content-Type:** `application/x-www-form-urlencoded`
+
+### Request fields
+
+<ParamField body="id" type="integer" required>
+  The ID of the game to update. Must be a valid integer matching an existing record.
+</ParamField>
+
+<ParamField body="title" type="string">
+  New title for the game. Omit or leave empty to keep the existing value.
+</ParamField>
+
+<ParamField body="genre" type="string">
+  New genre for the game. Omit or leave empty to keep the existing value.
+</ParamField>
+
+<ParamField body="platforms[]" type="string[]">
+  Replacement platform list. Omit or leave empty to keep the existing value. Submit multiple values using repeated `platforms[]` keys.
+</ParamField>
+
+<ParamField body="release_year" type="integer">
+  New release year. Omit or leave empty to keep the existing value.
+</ParamField>
+
+### Validation errors
+
+The server returns HTTP `400` with a JSON error message for the following conditions:
+
+| Condition | Error message |
+| --- | --- |
+| `id` is missing or not a valid integer | `"ID inválido para editar."` |
+| No updatable fields provided | `"No hay campos válidos para actualizar."` |
+
+### Success response
+
+```json 200
+{ "success": true, "message": "Juego editado exitosamente." }
+```
+
+### Example
+
+```bash cURL
+curl --request POST \
+  --url http://localhost/php/edit_service.php \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'id=3' \
+  --data-urlencode 'genre=Action RPG' \
+  --data-urlencode 'release_year=2022'
+```

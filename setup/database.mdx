@@ -1,0 +1,74 @@
+---
+title: 'Database setup'
+description: 'How the SQLite database is initialized, where it lives, and the table schema.'
+---
+
+Mi Colección de Juegos uses SQLite as its database. The database file is created automatically the first time the app handles a PHP request — no manual setup or migration commands are needed.
+
+## How initialization works
+
+All PHP endpoints connect to the database through the `getDB()` function defined in `php/setup_db.php`. When called, it:
+
+1. Checks whether `php/games.db` exists.
+2. Creates the file and runs the schema if it does not.
+3. Returns a PDO connection for the calling script to use.
+
+This means the database is ready as soon as you open the app for the first time. There is no separate install or migrate step.
+
+## Database file location
+
+The SQLite database file is stored at:
+
+```
+php/games.db
+```
+
+This path is relative to the project root. The file is created by the PHP process at runtime, so the `php/` directory must be writable by the web server.
+
+<Note>
+  On Linux servers running Apache or Nginx, the web server process typically runs as `www-data`. Make sure that user has write access to the `php/` directory:
+
+  ```bash
+  sudo chown -R www-data:www-data /var/www/html/mi-coleccion-de-juegos/php/
+  ```
+
+  On XAMPP (Windows/macOS) and with the PHP built-in server, this is handled automatically.
+</Note>
+
+## Table schema
+
+The database contains a single table, `juegos`, which stores the game collection.
+
+```sql
+CREATE TABLE IF NOT EXISTS juegos (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    title        TEXT NOT NULL,
+    genre        TEXT NOT NULL,
+    platforms    TEXT,
+    release_year INTEGER
+);
+```
+
+### Column reference
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| `id` | `INTEGER` | Primary key, auto-increment | Unique identifier for each game |
+| `title` | `TEXT` | Not null | Game title |
+| `genre` | `TEXT` | Not null | Game genre (e.g. RPG, Action) |
+| `platforms` | `TEXT` | Optional | Comma-separated list of platforms |
+| `release_year` | `INTEGER` | Optional | Year the game was released |
+
+## Backing up the database
+
+Because the entire database is a single file, backing it up is straightforward:
+
+```bash
+cp php/games.db php/games.db.backup
+```
+
+You can also copy the file while the app is running — SQLite handles concurrent access safely for single-user workloads.
+
+<Tip>
+  To reset the database and start fresh, stop your web server, delete `php/games.db`, and restart. The file will be recreated with an empty `juegos` table on the next request.
+</Tip>

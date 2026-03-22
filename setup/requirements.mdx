@@ -1,0 +1,82 @@
+---
+title: 'Requirements'
+description: 'System requirements for running Mi Colección de Juegos.'
+---
+
+Mi Colección de Juegos has minimal dependencies. It runs on any system with PHP and a web server.
+
+## Software requirements
+
+| Requirement | Minimum version | Notes |
+|-------------|-----------------|-------|
+| PHP | 7.4 | 8.x recommended |
+| SQLite3 extension | Bundled with PHP | Usually enabled by default |
+| PDO extension | Bundled with PHP | Required for database access |
+| PDO SQLite driver | Bundled with PHP | `pdo_sqlite` |
+| Web server | — | Apache, Nginx, or PHP built-in server |
+| Browser | Any modern browser | Chrome, Firefox, Safari, Edge |
+
+<Note>
+  No Node.js, Composer, or npm is required. The app is pure PHP and static HTML with no build step.
+</Note>
+
+## Checking your PHP version
+
+Run the following command to confirm PHP is installed and check the version:
+
+```bash
+php -v
+```
+
+Example output:
+
+```
+PHP 8.2.12 (cli) (built: Oct 24 2023 21:14:20)
+Copyright (c) The PHP Group
+```
+
+## Verifying required extensions
+
+Run the following to list all enabled PHP extensions and filter for the ones this app needs:
+
+```bash
+php -m | grep -E 'sqlite|pdo|PDO'
+```
+
+You should see at minimum:
+
+```
+PDO
+pdo_sqlite
+sqlite3
+```
+
+If any of these are missing, you will need to enable them in your `php.ini` file. Look for the following lines and remove the leading semicolon to uncomment them:
+
+```ini
+extension=pdo_sqlite
+extension=sqlite3
+```
+
+<Tip>
+  On most Linux distributions, these extensions are included in a package like `php-sqlite3` or `php8.2-sqlite3`. Install it with your package manager if the extensions are missing.
+</Tip>
+
+## Web server options
+
+Any of the following web servers work:
+
+- **Apache** with `mod_php` or PHP-FPM — the most common setup
+- **Nginx** with PHP-FPM
+- **XAMPP** — bundles Apache + PHP on Windows and macOS, easiest for local use
+- **WAMP** — similar to XAMPP, Windows only
+- **PHP built-in server** — no separate server software needed, development only
+
+## Browser
+
+The app uses standard HTML5, CSS, and JavaScript. Any modern browser works:
+
+- Google Chrome 90+
+- Mozilla Firefox 88+
+- Safari 14+
+- Microsoft Edge 90+
