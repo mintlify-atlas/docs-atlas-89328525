@@ -1,0 +1,70 @@
+{
+  "projectType": "saas",
+  "projectName": "Mi Colección de Juegos",
+  "projectDescription": "A web application for managing a personal video game collection with CRUD operations, store locator via Google Maps, and free game recommendations from FreeToGame API.",
+  "theme": "almond",
+  "primaryColor": "#171717",
+  "lightColor": "#f4f4f5",
+  "darkColor": "#171717",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Getting Started",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["introduction", "quickstart"]
+          },
+          {
+            "group": "Setup",
+            "pages": ["setup/requirements", "setup/installation", "setup/database"]
+          }
+        ]
+      },
+      {
+        "tab": "Features",
+        "groups": [
+          {
+            "group": "My Collection",
+            "pages": ["features/my-games", "features/add-game", "features/edit-delete"]
+          },
+          {
+            "group": "Discover",
+            "pages": ["features/store-locator", "features/recommendations"]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Backend Services",
+            "pages": ["api/db-service", "api/form-service", "api/edit-service", "api/delete-service", "api/json-service", "api/third-party-service"]
+          },
+          {
+            "group": "Error Handling",
+            "pages": ["api/error-handling"]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "View, search, and filter personal video game collection",
+    "Add new games with title, genre, platform, and release year",
+    "Edit and delete existing game entries",
+    "SQLite database persistence via PHP backend",
+    "Google Maps integration to locate nearby video game stores",
+    "Free game recommendations from FreeToGame API",
+    "RESTful JSON API with Problem Details error format",
+    "Client-side form validation with user feedback"
+  ],
+  "publicApiSurface": [
+    "GET/POST php/db_service.php — List or search games",
+    "POST php/form_service.php — Add a new game",
+    "POST php/edit_service.php — Edit an existing game",
+    "POST php/delete_service.php — Delete a game",
+    "POST php/json_service.php — JSON echo service",
+    "GET php/third_party_service.php — Free-to-play game recommendations"
+  ]
+}
