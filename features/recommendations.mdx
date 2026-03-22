@@ -14,7 +14,7 @@ Each game card in the `.games-grid` container includes:
 - The **genre**
 - Additional metadata returned by the FreeToGame API (such as platform and publisher)
 
-The list is sorted by **release date** (newest first) as specified in the API request.
+The list shows **12 randomly selected titles** from the full FreeToGame catalog. Each page load or refresh shuffles the results, so you see a different set of games every time.
 
 ## How to refresh recommendations
 
@@ -46,5 +46,5 @@ Directly calling the FreeToGame API from the browser would fail due to [CORS](ht
 ## Limitations
 
 - **Free-to-play PC games only.** The API request is scoped to `platform=pc`. Console titles and paid games are not included.
-- **Sorted by release date.** Results always reflect the newest titles first; there is no option to sort by rating or popularity from this page.
+- **Randomized display.** The frontend shuffles the full FreeToGame catalog and picks 12 titles at random each time the page loads or is refreshed.
 - **Third-party data.** If the FreeToGame API is unavailable or returns an error, the recommendations grid will not populate.

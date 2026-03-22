@@ -14,7 +14,7 @@ Make sure your system meets the [requirements](/setup/requirements) — specific
 <Steps>
   <Step title="Clone the repository">
     ```bash
-    git clone https://github.com/your-org/mi-coleccion-de-juegos.git
+    git clone https://github.com/IsaacMO214/mi-coleccion-juegos.git
     ```
 
     Alternatively, download and extract the ZIP from the repository's releases page.
@@ -29,18 +29,18 @@ Make sure your system meets the [requirements](/setup/requirements) — specific
 
         **Windows:**
         ```
-        C:\xampp\htdocs\mi-coleccion-de-juegos\
+        C:\xampp\htdocs\mi-coleccion-juegos\
         ```
 
         **macOS:**
         ```
-        /Applications/XAMPP/htdocs/mi-coleccion-de-juegos/
+        /Applications/XAMPP/htdocs/mi-coleccion-juegos/
         ```
 
         Then start Apache from the XAMPP Control Panel and open:
 
         ```
-        http://localhost/mi-coleccion-de-juegos/
+        http://localhost/mi-coleccion-juegos/
         ```
       </Tab>
       <Tab title="PHP built-in server">
@@ -61,19 +61,19 @@ Make sure your system meets the [requirements](/setup/requirements) — specific
 
         **Linux:**
         ```bash
-        sudo cp -r mi-coleccion-de-juegos /var/www/html/
+        sudo cp -r mi-coleccion-juegos /var/www/html/
         ```
 
         **Make the `php/` directory writable** by the Apache user so the database file can be created:
 
         ```bash
-        sudo chown -R www-data:www-data /var/www/html/mi-coleccion-de-juegos/php/
+        sudo chown -R www-data:www-data /var/www/html/mi-coleccion-juegos/php/
         ```
 
         Then open:
 
         ```
-        http://localhost/mi-coleccion-de-juegos/
+        http://localhost/mi-coleccion-juegos/
         ```
       </Tab>
     </Tabs>
@@ -89,14 +89,41 @@ Make sure your system meets the [requirements](/setup/requirements) — specific
 ## Project structure
 
 ```
-mi-coleccion-de-juegos/
-├── index.html              # Collection overview
+mi-coleccion-juegos/
+├── index.html              # Collection overview (My Games)
 ├── agregar.html            # Add a game
-├── tiendas.html            # Store management
-├── recomendaciones.html    # Game recommendations
-└── php/
-    ├── setup_db.php        # Database initialization and connection
-    └── games.db            # SQLite database (auto-created on first use)
+├── tiendas.html            # Store locator
+├── recomendaciones.html    # Free game recommendations
+├── css/
+│   └── style.css           # Application styles
+├── js/
+│   ├── index.js            # My Games page logic
+│   ├── agregar.js          # Add Game page logic
+│   ├── tiendas.js          # Store locator logic
+│   ├── recomendaciones.js  # Recommendations logic
+│   └── lib/
+│       ├── consume.js      # Fetch error handler
+│       ├── enviaJsonRecibeJson.js  # JSON POST helper
+│       ├── recibeJson.js   # GET/JSON response helper
+│       ├── muestraError.js # User error display
+│       └── ProblemDetailsError.js # Error class
+├── php/
+│   ├── db_service.php      # List/search games
+│   ├── form_service.php    # Add a game
+│   ├── edit_service.php    # Edit a game
+│   ├── delete_service.php  # Delete a game
+│   ├── json_service.php    # JSON utility service
+│   ├── third_party_service.php  # FreeToGame proxy
+│   ├── setup_db.php        # DB initialization
+│   ├── error_handling.php  # Global exception handler
+│   ├── games.db            # SQLite database (auto-created)
+│   └── lib/
+│       ├── devuelveJson.php
+│       ├── recibeJson.php
+│       └── ProblemDetailsException.php
+└── errors/
+    ├── errorinterno.html
+    └── resultadonojson.html
 ```
 
 <Note>

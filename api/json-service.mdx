@@ -17,10 +17,14 @@ Accepts a JSON body containing a game ID, validates the input, and returns a pro
 
 ### Validation errors
 
-The server returns HTTP `400` if `gameId` is absent from the request body:
+The server returns HTTP `400` with a Problem Details response if `gameId` is absent from the request body:
 
 ```json 400
-{ "success": false, "message": "Falta el campo requerido: 'gameId'." }
+{
+  "type": "about:blank",
+  "title": "Falta el campo requerido: 'gameId'.",
+  "status": 400
+}
 ```
 
 ### Response fields

@@ -6,84 +6,104 @@ description: "How errors are reported and handled across all backend services."
 All backend services in Mi Colección de Juegos return errors in the [RFC 7807 Problem Details](https://www.rfc-editor.org/rfc/rfc7807) format. This gives every error response a consistent, machine-readable structure that both the frontend and API consumers can rely on.
 
 <Note>
-  RFC 7807 defines a standard JSON format for HTTP error responses. Using `"type": "about:blank"` indicates that the HTTP status code itself (via its title) fully describes the problem, with the `detail` field providing the specific context.
+  RFC 7807 defines a standard JSON format for HTTP error responses. Using `"type": "about:blank"` indicates that the HTTP status code itself fully describes the problem category, with the `detail` field providing specific context for this occurrence.
 </Note>
 
 ## Error response structure
 
 Every error response has `Content-Type: application/problem+json` and the following fields:
 
-<ResponseField name="type" type="string" required>
-  A URI reference identifying the problem type. All errors in this app use `"about:blank"`, meaning the HTTP status code title alone describes the problem category.
+<ResponseField name="type" type="string">
+  A URI reference identifying the problem type. Most errors use `"about:blank"`. The `recibeJson()` library uses `"/errors/datosnojson.html"` when the request body is not valid JSON.
 </ResponseField>
 
-<ResponseField name="title" type="string" required>
-  A short, human-readable summary of the problem type. Corresponds to the standard HTTP status phrase (e.g., `"Bad Request"`, `"Method Not Allowed"`).
+<ResponseField name="title" type="string">
+  A short, human-readable summary of the problem.
 </ResponseField>
 
-<ResponseField name="status" type="number" required>
+<ResponseField name="status" type="number">
   The HTTP status code for this occurrence of the problem. Mirrors the actual HTTP response status code.
 </ResponseField>
 
-<ResponseField name="detail" type="string" required>
-  A human-readable explanation specific to this occurrence. This is the field the frontend displays directly to the user.
+<ResponseField name="detail" type="string">
+  A human-readable explanation specific to this occurrence. This field is **optional** — it is only included when additional context beyond the title is available. The frontend reads this field to display user-facing error messages.
 </ResponseField>
 
 ```json example error response
 {
   "type": "about:blank",
-  "title": "Bad Request",
-  "status": 400,
-  "detail": "Faltan datos requeridos: Título y Género no pueden estar vacíos."
+  "title": "Faltan datos requeridos: Título y Género no pueden estar vacíos.",
+  "status": 400
 }
 ```
 
 ## Error codes
 
-| Status | Title                 | When it occurs                                      |
-| ------ | --------------------- | --------------------------------------------------- |
-| `400`  | Bad Request           | A required field is missing or contains invalid data |
-| `405`  | Method Not Allowed    | The endpoint was called with the wrong HTTP method  |
-| `502`  | Bad Gateway           | An external service or dependency was unreachable   |
+| Status | When it occurs |
+| ------ | -------------- |
+| `400`  | A required field is missing or contains invalid data |
+| `405`  | The endpoint was called with the wrong HTTP method |
+| `500`  | An unexpected internal server error occurred |
+| `502`  | An external service (FreeToGame API) was unreachable |
 
 ## Example responses
 
 <AccordionGroup>
   <Accordion title="400 Bad Request">
-    Returned when a required field is absent or fails validation. The `detail` field names the specific missing or invalid data.
+    Returned when a required field is absent or fails validation. The `title` field contains the specific error message from `ProblemDetailsError`.
 
-    ```json response
+    ```json
     {
       "type": "about:blank",
-      "title": "Bad Request",
+      "title": "Faltan datos requeridos: Título y Género no pueden estar vacíos.",
+      "status": 400
+    }
+    ```
+
+    When the request body is not valid JSON (from `php/lib/recibeJson.php`):
+
+    ```json
+    {
       "status": 400,
-      "detail": "Faltan datos requeridos: Título y Género no pueden estar vacíos."
+      "title": "Los datos recibidos no están en formato JSON.",
+      "type": "/errors/datosnojson.html"
     }
     ```
   </Accordion>
 
   <Accordion title="405 Method Not Allowed">
-    Returned when the request uses an HTTP method that the endpoint does not support (e.g., sending a `GET` to a `POST`-only endpoint).
+    Returned when the request uses an HTTP method the endpoint does not support (e.g., `GET` to a `POST`-only endpoint).
 
-    ```json response
+    ```json
     {
       "type": "about:blank",
-      "title": "Method Not Allowed",
-      "status": 405,
-      "detail": "Este endpoint solo acepta solicitudes POST."
+      "title": "Método no permitido. Use POST.",
+      "status": 405
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="500 Internal Server Error">
+    Returned for unexpected exceptions not caught by a more specific handler. The `detail` field contains the exception message.
+
+    ```json
+    {
+      "type": "about:blank",
+      "title": "Error interno del servidor",
+      "status": 500,
+      "detail": "..."
     }
     ```
   </Accordion>
 
   <Accordion title="502 Bad Gateway">
-    Returned when the backend cannot reach an external dependency (e.g., a remote API or service used during a request).
+    Returned when `php/third_party_service.php` cannot reach the FreeToGame API.
 
-    ```json response
+    ```json
     {
       "type": "about:blank",
-      "title": "Bad Gateway",
-      "status": 502,
-      "detail": "No se pudo conectar con el servicio externo. Inténtelo de nuevo más tarde."
+      "title": "Error al contactar el servicio de terceros.",
+      "status": 502
     }
     ```
   </Accordion>
@@ -91,74 +111,104 @@ Every error response has `Content-Type: application/problem+json` and the follow
 
 ## Error classes
 
-The error system is built on two PHP classes defined in `php/lib/`.
+The error system is built on two PHP classes.
 
 ### `ProblemDetailsError`
 
-The base class for all application errors. Accepts a message string and an HTTP status code, and produces a structured Problem Details payload.
+Defined in `php/error_handling.php`. The base class for all application errors. Accepts a title string, HTTP status code, optional detail, and optional type URI.
 
-```php php/lib/ProblemDetailsException.php
-class ProblemDetailsError {
+```php php/error_handling.php
+class ProblemDetailsError extends Exception {
     public function __construct(
-        protected string $detail,
-        protected int $status
-    ) {}
+        $title,
+        $status = 400,
+        $detail = null,
+        $type = "about:blank"
+    ) { ... }
 
-    public function toArray(): array {
-        return [
-            'type'   => 'about:blank',
-            'title'  => $this->getTitle(),
-            'status' => $this->status,
-            'detail' => $this->detail,
+    public function sendResponse() {
+        http_response_code($this->status);
+        header('Content-Type: application/problem+json');
+
+        $response = [
+            "type"   => $this->type,
+            "title"  => $this->title,
+            "status" => $this->status
         ];
+
+        // detail is only included when non-null
+        if ($this->detail !== null) {
+            $response["detail"] = $this->detail;
+        }
+
+        echo json_encode($response);
+        exit();
     }
 }
 ```
 
 ### `ProblemDetailsException`
 
-Extends `ProblemDetailsError` and implements `\Throwable`, allowing it to be thrown and caught by the global exception handler. Used throughout the service layer to signal recoverable HTTP errors.
+Defined in `php/lib/ProblemDetailsException.php`. Accepts a pre-built content array and sends it directly, providing more control over the full response payload.
 
 ```php php/lib/ProblemDetailsException.php
-class ProblemDetailsException extends ProblemDetailsError {
-    // Throwable — can be thrown and caught
+class ProblemDetailsException extends Exception {
+    public function __construct(array $content) {
+        parent::__construct($content['title'] ?? 'Error');
+        $this->content = $content;
+    }
+
+    public function sendResponse() {
+        $status = $this->content['status'] ?? 400;
+        http_response_code($status);
+        header("Content-Type: application/problem+json; charset=utf-8");
+        echo json_encode($this->content);
+        exit();
+    }
 }
 ```
 
-<Warning>
-  Only throw `ProblemDetailsException` for expected, handleable HTTP error conditions (e.g., missing input, wrong method). Unexpected internal errors should not be surfaced directly to the client with implementation details.
-</Warning>
-
 ## Global exception handler
 
-`php/error_handling.php` registers a global exception handler that intercepts any uncaught `ProblemDetailsException` and renders it as a JSON response with the correct HTTP status code.
+`php/error_handling.php` registers a global exception handler using `set_exception_handler`. It catches any uncaught `ProblemDetailsError` or `ProblemDetailsException` and calls `sendResponse()`. All other exceptions are caught and returned as a generic 500 response.
 
 ```php php/error_handling.php
-set_exception_handler(function (Throwable $e) {
-    if ($e instanceof ProblemDetailsException) {
-        http_response_code($e->getStatus());
+function muestraError(Throwable $e) {
+    if ($e instanceof ProblemDetailsError || $e instanceof ProblemDetailsException) {
+        $e->sendResponse();
+    } else {
+        http_response_code(500);
         header('Content-Type: application/problem+json');
-        echo json_encode($e->toArray());
+        echo json_encode([
+            "type"   => "about:blank",
+            "title"  => "Error interno del servidor",
+            "status" => 500,
+            "detail" => $e->getMessage()
+        ]);
+        exit();
     }
-});
+}
+
+set_exception_handler('muestraError');
 ```
 
 ## Frontend error handling
 
-The frontend reads Problem Details responses in `js/lib/muestraError.js` and `js/lib/ProblemDetailsError.js`. When a fetch call returns a non-2xx status, the frontend:
+The frontend uses `js/lib/consume.js` and `js/lib/ProblemDetailsError.js` to detect and parse Problem Details responses. When a `fetch` call returns a non-2xx response with `Content-Type: application/problem+json`, `consume()` throws a `ProblemDetailsError` containing the parsed body.
 
-1. Parses the JSON body as a Problem Details object.
-2. Reads the `detail` field.
-3. Displays that string directly to the user in the UI.
-
-```javascript js/lib/muestraError.js
-async function handleResponse(response) {
-  if (!response.ok) {
-    const problem = await response.json();
-    // problem.detail contains the user-facing message
-    muestraError(problem.detail);
-  }
+```javascript js/lib/consume.js
+export async function consume(servicio) {
+    const respuesta = await servicio;
+    if (respuesta.ok) {
+        return respuesta;
+    } else {
+        const contentType = respuesta.headers.get("Content-Type");
+        if (contentType !== null && contentType.startsWith("application/problem+json"))
+            throw new ProblemDetailsError(await respuesta.json());
+        else
+            throw new Error(respuesta.statusText);
+    }
 }
 ```
 
-Because all services use the same response shape, a single error-handling utility covers every endpoint in the app.
+`js/lib/muestraError.js` then reads the `title` and `detail` fields from the thrown error and displays them to the user via `alert()` and `console.error()`.

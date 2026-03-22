@@ -31,16 +31,19 @@ On success, the script extracts the user's latitude and longitude and updates th
 On failure, the `#location-status` element displays an error message so you know what went wrong.
 
 ```javascript
-// Simplified flow in js/tiendas.js
+// From js/tiendas.js
 navigator.geolocation.getCurrentPosition(
-  (position) => {
-    const { latitude, longitude } = position.coords;
-    mapIframe.src = `https://maps.google.com/maps?q=tiendas+de+videojuegos&ll=${latitude},${longitude}&z=12&output=embed`;
-    locationStatus.textContent = 'Ubicación encontrada.';
-  },
-  (error) => {
-    locationStatus.textContent = 'No se pudo obtener la ubicación.';
-  }
+    (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        mapIframe.src = `https://www.google.com/maps?q=tiendas+de+videojuegos+near+${lat},${lon}&hl=es&z=14&output=embed`;
+        locationStatus.textContent = "Ubicación detectada.";
+        locationStatus.style.color = "var(--success)";
+    },
+    (error) => {
+        locationStatus.textContent = "Error al obtener la ubicación. Verifica los permisos.";
+        locationStatus.style.color = "var(--error)";
+    }
 );
 ```
 

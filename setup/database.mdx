@@ -29,7 +29,7 @@ This path is relative to the project root. The file is created by the PHP proces
   On Linux servers running Apache or Nginx, the web server process typically runs as `www-data`. Make sure that user has write access to the `php/` directory:
 
   ```bash
-  sudo chown -R www-data:www-data /var/www/html/mi-coleccion-de-juegos/php/
+  sudo chown -R www-data:www-data /var/www/html/mi-coleccion-juegos/php/
   ```
 
   On XAMPP (Windows/macOS) and with the PHP built-in server, this is handled automatically.
@@ -44,8 +44,8 @@ CREATE TABLE IF NOT EXISTS juegos (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     title        TEXT NOT NULL,
     genre        TEXT NOT NULL,
-    platforms    TEXT,
-    release_year INTEGER
+    platforms    TEXT NOT NULL,
+    release_year INTEGER NOT NULL
 );
 ```
 
@@ -55,9 +55,9 @@ CREATE TABLE IF NOT EXISTS juegos (
 |--------|------|-------------|-------------|
 | `id` | `INTEGER` | Primary key, auto-increment | Unique identifier for each game |
 | `title` | `TEXT` | Not null | Game title |
-| `genre` | `TEXT` | Not null | Game genre (e.g. RPG, Action) |
-| `platforms` | `TEXT` | Optional | Comma-separated list of platforms |
-| `release_year` | `INTEGER` | Optional | Year the game was released |
+| `genre` | `TEXT` | Not null | Game genre (e.g. RPG, Acción) |
+| `platforms` | `TEXT` | Not null | Comma-separated list of platforms (e.g. `"PC, PlayStation 5"`) |
+| `release_year` | `INTEGER` | Not null | Year the game was released |
 
 ## Backing up the database
 
@@ -70,5 +70,5 @@ cp php/games.db php/games.db.backup
 You can also copy the file while the app is running — SQLite handles concurrent access safely for single-user workloads.
 
 <Tip>
-  To reset the database and start fresh, stop your web server, delete `php/games.db`, and restart. The file will be recreated with an empty `juegos` table on the next request.
+  To reset the database and start fresh, stop your web server, delete `php/games.db`, and restart. The file will be recreated on the next request with the `juegos` table and three sample games pre-inserted (The Legend of Zelda: Breath of the Wild, Super Mario Odyssey, and The Witcher 3: Wild Hunt).
 </Tip>
